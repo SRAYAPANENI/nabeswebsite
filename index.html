@@ -24,6 +24,9 @@
     --btn-ink:#06181A;
     --danger:#C1432B;
     --ring:rgba(14,165,183,0.22);
+    --glow:rgba(14,165,183,0.16);
+    --shadow-card:0 16px 32px rgba(17,19,21,0.10);
+    --shadow-header:0 8px 20px rgba(17,19,21,0.06);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -41,6 +44,9 @@
       --btn-ink:#06181A;
       --danger:#FF8A73;
       --ring:rgba(47,203,221,0.22);
+      --glow:rgba(47,203,221,0.18);
+      --shadow-card:0 16px 34px rgba(47,203,221,0.14);
+      --shadow-header:0 8px 20px rgba(0,0,0,0.35);
     }
   }
   :root[data-theme="dark"]{
@@ -58,6 +64,9 @@
     --btn-ink:#06181A;
     --danger:#FF8A73;
     --ring:rgba(47,203,221,0.22);
+    --glow:rgba(47,203,221,0.18);
+    --shadow-card:0 16px 34px rgba(47,203,221,0.14);
+    --shadow-header:0 8px 20px rgba(0,0,0,0.35);
   }
 
   *{box-sizing:border-box;}
@@ -106,7 +115,9 @@
     background:rgba(244,247,247,0.88);
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
+    transition:box-shadow .3s ease;
   }
+  header.site.scrolled{box-shadow:var(--shadow-header);}
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]) header.site{background:rgba(11,15,16,0.88);}
   }
@@ -191,12 +202,73 @@
   }
 
   /* ---------- Hero ---------- */
-  .hero{padding-top:64px; padding-bottom:88px;}
+  .hero{
+    padding-top:64px;
+    padding-bottom:88px;
+    position:relative;
+    overflow:hidden;
+  }
   .hero-grid{
     display:grid;
     grid-template-columns:64px 1fr;
     gap:20px;
+    position:relative;
+    z-index:1;
   }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(16px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes spinGlobe{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
+  }
+  @keyframes driftGlow{
+    0%{ transform:translate(0,0) scale(1); }
+    100%{ transform:translate(-6%,8%) scale(1.08); }
+  }
+
+  .hero-glow{
+    position:absolute;
+    top:-30%;
+    right:-14%;
+    width:min(60vw,640px);
+    aspect-ratio:1/1;
+    background:radial-gradient(circle, var(--glow) 0%, transparent 68%);
+    filter:blur(6px);
+    animation:driftGlow 22s ease-in-out infinite alternate;
+    pointer-events:none;
+    z-index:0;
+  }
+  .hero-globe{
+    position:absolute;
+    top:-10%;
+    right:-4%;
+    width:min(48vw,440px);
+    aspect-ratio:1/1;
+    z-index:0;
+    animation:spinGlobe 120s linear infinite;
+    pointer-events:none;
+  }
+  .hero-globe svg{width:100%; height:100%; display:block;}
+  .hero-globe circle, .hero-globe ellipse, .hero-globe line{
+    fill:none;
+    stroke:var(--line-strong);
+    stroke-width:0.6;
+    opacity:0.6;
+  }
+  @media (max-width:760px){
+    .hero-glow{width:min(90vw,420px); top:-20%; right:-30%;}
+    .hero-globe{width:min(70vw,320px); top:-6%; right:-18%; opacity:0.7;}
+  }
+
+  .hero .eyebrow{animation:fadeUp .7s ease both;}
+  .hero h1{animation:fadeUp .7s ease .08s both;}
+  .hero .hero-sub{animation:fadeUp .7s ease .16s both;}
+  .hero .hero-cta{animation:fadeUp .7s ease .24s both;}
+  .hero .hero-meta{animation:fadeUp .7s ease .32s both;}
+
   .hero h1{
     font-size:clamp(34px, 6vw, 62px);
     line-height:1.06;
@@ -312,6 +384,12 @@
     border:1px solid var(--line);
     border-radius:4px;
     padding:30px 28px;
+    transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, border-color .3s ease;
+  }
+  .service-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-card);
+    border-color:var(--line-strong);
   }
   .service-card .tag{
     font-family:'IBM Plex Mono',monospace;
@@ -345,6 +423,12 @@
     flex-direction:column;
     gap:14px;
     position:relative;
+    transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, border-color .3s ease;
+  }
+  .product-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-card);
+    border-color:var(--line-strong);
   }
   .product-card.flagship{
     grid-column:1 / -1;
@@ -648,6 +732,24 @@
   }
   .toast-close:hover{opacity: 1;}
 
+  /* ---------- Scroll reveal ---------- */
+  [data-reveal].reveal-init{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
+  }
+  [data-reveal].reveal-init.in-view{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .service-grid [data-reveal]:nth-child(2){transition-delay:.08s;}
+  .portfolio-grid [data-reveal]:nth-child(2){transition-delay:.06s;}
+  .portfolio-grid [data-reveal]:nth-child(3){transition-delay:.12s;}
+  .portfolio-grid [data-reveal]:nth-child(4){transition-delay:.18s;}
+  .portfolio-grid [data-reveal]:nth-child(5){transition-delay:.24s;}
+  .about-grid [data-reveal]:nth-child(2){transition-delay:.1s;}
+  .contact-grid [data-reveal]:nth-child(2){transition-delay:.1s;}
+
   footer{
     padding-block:28px;
   }
@@ -693,6 +795,17 @@
 
 <main id="top">
   <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-globe" aria-hidden="true">
+      <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="92"></circle>
+        <ellipse cx="100" cy="100" rx="92" ry="34"></ellipse>
+        <ellipse cx="100" cy="100" rx="92" ry="60"></ellipse>
+        <ellipse cx="100" cy="100" rx="34" ry="92"></ellipse>
+        <ellipse cx="100" cy="100" rx="60" ry="92"></ellipse>
+        <line x1="8" y1="100" x2="192" y2="100"></line>
+      </svg>
+    </div>
     <div class="wrap hero-grid">
       <div></div>
       <div>
@@ -714,7 +827,7 @@
 
   <section id="about">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <span class="section-num mono">01</span>
         <div>
           <p class="eyebrow">About NaBeS</p>
@@ -722,11 +835,11 @@
         </div>
       </div>
       <div class="about-grid">
-        <div class="about-lead">
+        <div class="about-lead" data-reveal>
           <p>NaBeS Platform Services runs on two tracks at once. We build and operate our own products across HR tech, edtech, agri-tech and business operations &mdash; and we take on client work where the brief is the same problem we solve for ourselves: get a genuinely usable, market-ready product out the door.</p>
           <p>That combination is the point. Every client build is handled by a team that also owns products end to end &mdash; support, iteration, real users &mdash; not one that hands off a build and walks away.</p>
         </div>
-        <dl class="fact-list">
+        <dl class="fact-list" data-reveal>
           <dt>What we build</dt>
           <dd>Web platforms, mobile apps, admin &amp; ops consoles, and the AI-driven engines behind them.</dd>
           <dt>How we work</dt>
@@ -740,7 +853,7 @@
 
   <section id="services">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <span class="section-num mono">02</span>
         <div>
           <p class="eyebrow">What we do</p>
@@ -748,12 +861,12 @@
         </div>
       </div>
       <div class="service-grid">
-        <div class="service-card">
+        <div class="service-card" data-reveal>
           <span class="tag">Product Engineering</span>
           <h3>Our own platforms</h3>
           <p>We conceive, build and run our own products &mdash; HRMS, Yudhvidya, Dodorez and Bhadra Agro Services all started this way. It's how we keep our engineering standards honest: we live with what we ship.</p>
         </div>
-        <div class="service-card">
+        <div class="service-card" data-reveal>
           <span class="tag">Client Builds</span>
           <h3>Your idea, built market-ready</h3>
           <p>We take a client's idea from spec to a real, launchable product &mdash; web and mobile, dashboards and back-office tooling, and the AI-driven matching or automation logic behind it, when the product needs one.</p>
@@ -764,7 +877,7 @@
 
   <section id="portfolio">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <span class="section-num mono">03</span>
         <div>
           <p class="eyebrow">Portfolio</p>
@@ -773,7 +886,7 @@
       </div>
       <div class="portfolio-grid">
 
-        <div class="product-card flagship">
+        <div class="product-card flagship" data-reveal>
           <div class="flagship-layout">
             <div class="flagship-info" style="display:flex; flex-direction:column; gap:14px; height:100%;">
               <div class="product-top">
@@ -791,7 +904,7 @@
           </div>
         </div>
 
-        <div class="product-card">
+        <div class="product-card" data-reveal>
           <div class="product-img-wrap">
             <img src="images/hrms.jpg" alt="HRMS Enterprise HR Management Interface" loading="lazy">
           </div>
@@ -805,7 +918,7 @@
           </div>
         </div>
 
-        <div class="product-card">
+        <div class="product-card" data-reveal>
           <div class="product-img-wrap">
             <img src="images/yudhvidya.jpg" alt="Yudhvidya EdTech Learning Platform" loading="lazy">
           </div>
@@ -819,7 +932,7 @@
           </div>
         </div>
 
-        <div class="product-card">
+        <div class="product-card" data-reveal>
           <div class="product-img-wrap">
             <img src="images/bhadra_agro.jpg" alt="Bhadra Agro Services Supply Chain Interface" loading="lazy">
           </div>
@@ -833,7 +946,7 @@
           </div>
         </div>
 
-        <div class="product-card">
+        <div class="product-card" data-reveal>
           <div class="product-img-wrap">
             <img src="images/skofy.jpg" alt="Skofy C2C Home Services Marketplace App" loading="lazy">
           </div>
@@ -853,7 +966,7 @@
 
   <section id="contact">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <span class="section-num mono">04</span>
         <div>
           <p class="eyebrow">Get in touch</p>
@@ -861,7 +974,7 @@
         </div>
       </div>
       <div class="contact-grid">
-        <div>
+        <div data-reveal>
           <p class="contact-note" style="margin-top:0; max-width:54ch;">Fill in your details below to send a project brief directly to our team at <strong>connect@nabes.in</strong>. We'll review your requirements and respond within 24 hours.</p>
           
           <form id="contactSectionForm" class="project-form" style="margin-top:24px;">
@@ -906,7 +1019,7 @@
           </form>
         </div>
 
-        <dl class="contact-side">
+        <dl class="contact-side" data-reveal>
           <dt>Company</dt>
           <dd>NaBeS Platform Services Pvt. Ltd.</dd>
           <dt>Direct Email</dt>
@@ -986,6 +1099,35 @@
     try {
       var y = document.getElementById('year');
       if(y){ y.textContent = String(new Date().getFullYear()); }
+    }catch(e){}
+
+    try {
+      var siteHeader = document.querySelector('header.site');
+      if(siteHeader){
+        var onScrollHeader = function(){
+          if(window.scrollY > 8){ siteHeader.classList.add('scrolled'); }
+          else{ siteHeader.classList.remove('scrolled'); }
+        };
+        window.addEventListener('scroll', onScrollHeader, { passive: true });
+        onScrollHeader();
+      }
+    }catch(e){}
+
+    try {
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var revealTargets = document.querySelectorAll('[data-reveal]');
+      if(revealTargets.length && !reduceMotion && typeof IntersectionObserver !== 'undefined'){
+        revealTargets.forEach(function(el){ el.classList.add('reveal-init'); });
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              entry.target.classList.add('in-view');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        revealTargets.forEach(function(el){ io.observe(el); });
+      }
     }catch(e){}
 
     var modal = document.getElementById('projectModal');
