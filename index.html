@@ -704,7 +704,7 @@
   .form-group select:focus,
   .form-group textarea:focus{
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(14, 165, 183, 0.15);
+    box-shadow: 0 0 0 3px var(--ring);
   }
   .form-group textarea{
     resize: vertical;
@@ -1198,12 +1198,16 @@
     var modal = document.getElementById('projectModal');
     var openBtn = document.getElementById('openProjectModal');
     var closeBtn = document.getElementById('closeProjectModal');
+    var lastFocused = null;
 
     function openModal() {
       if(modal){
+        lastFocused = document.activeElement;
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        var firstField = document.getElementById('m_name');
+        if(firstField){ setTimeout(function(){ firstField.focus(); }, 260); }
       }
     }
     function closeModal() {
@@ -1211,6 +1215,7 @@
         modal.classList.remove('active');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if(lastFocused && typeof lastFocused.focus === 'function'){ lastFocused.focus(); }
       }
     }
 
@@ -1222,7 +1227,21 @@
         if(e.target === modal){ closeModal(); }
       });
       document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && modal.classList.contains('active')){ closeModal(); }
+        if(!modal.classList.contains('active')) return;
+        if(e.key === 'Escape'){ closeModal(); return; }
+        if(e.key === 'Tab'){
+          var focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if(!focusable.length) return;
+          var first = focusable[0];
+          var last = focusable[focusable.length - 1];
+          if(e.shiftKey && document.activeElement === first){
+            e.preventDefault();
+            last.focus();
+          }else if(!e.shiftKey && document.activeElement === last){
+            e.preventDefault();
+            first.focus();
+          }
+        }
       });
     }
 
